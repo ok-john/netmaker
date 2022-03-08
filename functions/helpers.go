@@ -8,6 +8,10 @@ import (
 	"github.com/gravitl/netmaker/models"
 )
 
+const (
+	DNS_CHAR_SET = "abcdefghijklmnopqrstuvwxyz1234567889-."
+)
+
 // NetworkExists - check if network exists
 func NetworkExists(name string) (bool, error) {
 
@@ -21,11 +25,8 @@ func NetworkExists(name string) (bool, error) {
 
 // NameInDNSCharSet - name in dns char set
 func NameInDNSCharSet(name string) bool {
-
-	charset := "abcdefghijklmnopqrstuvwxyz1234567890-."
-
 	for _, char := range name {
-		if !strings.Contains(charset, strings.ToLower(string(char))) {
+		if !strings.Contains(DNS_CHAR_SET, strings.ToLower(string(char))) {
 			return false
 		}
 	}
@@ -34,11 +35,8 @@ func NameInDNSCharSet(name string) bool {
 
 // NameInNodeCharSet - name in node char set
 func NameInNodeCharSet(name string) bool {
-
-	charset := "abcdefghijklmnopqrstuvwxyz1234567890-"
-
 	for _, char := range name {
-		if !strings.Contains(charset, strings.ToLower(string(char))) {
+		if !strings.Contains(DNS_CHAR_SET, strings.ToLower(string(char))) {
 			return false
 		}
 	}
