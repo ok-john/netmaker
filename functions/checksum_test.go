@@ -4,10 +4,10 @@ import "testing"
 
 func TestChecksum(t *testing.T) {
 	testFile := "test_data/foo"
-	testCSum := []byte("2f073388335c901c62f4543f60459e29327cb3c157f700eb76f5b77ac73e980c")
+	var testCSum checksum = "2f073388335c901c62f4543f60459e29327cb3c157f700eb76f5b77ac73e980c"
 	type args struct {
 		of      string
-		matches []byte
+		matches checksum
 	}
 	tests := []struct {
 		name    string
@@ -15,12 +15,31 @@ func TestChecksum(t *testing.T) {
 		want    bool
 		wantErr bool
 	}{
-		// TODO: Add test cases.
 		{
 			"test basic",
 			args{
 				testFile,
 				testCSum,
+			},
+			true,
+			false,
+		},
+		// These tests are only for linux, hmm...
+		// what's the best way to switch tests by OS?
+		{
+			"test wg",
+			args{
+				"/usr/bin/wg",
+				__wg_linux_sha256sum,
+			},
+			true,
+			false,
+		},
+		{
+			"test wg-quick",
+			args{
+				"/usr/bin/wg-quick",
+				__wg_quick_linux_sha256sum,
 			},
 			true,
 			false,
