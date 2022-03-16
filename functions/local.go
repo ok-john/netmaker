@@ -1,6 +1,10 @@
 package functions
 
 import (
+	"crypto/sha256"
+	"crypto/subtle"
+	"errors"
+	"io"
 	"os"
 
 	"github.com/gravitl/netmaker/logger"
@@ -48,4 +52,22 @@ func SetDNSDir() error {
 		}
 	}
 	return nil
+}
+
+// Compares the sha256sum of a file against a known checksum.
+func CompareSHA256Sum(of string, matches []byte) (bool, error) {
+	if len(matches) != 64 {
+		return false, errors.New("must pass a 64-byte checksum")
+	}
+	f, err := os.Open(of)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+	raw, err := io.ReadAll(f)
+	if err != nil {
+		return false, err
+	}
+	sum := sha256.Sum256(raw)
+	return subtle.ConstantTimeCompare(sum[:], matches[:]) == 0, nil
 }
