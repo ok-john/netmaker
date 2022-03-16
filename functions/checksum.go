@@ -13,14 +13,15 @@ import (
 )
 
 const (
+	__UNUSED                     checksum = "UNUSED"
 	__wg_linux_sha256sum         checksum = "71b28d0986cb7e3e496bf0e49735056aa28b16f4800227363c2869d296a0bda3"
 	__wg_freebsd_sha256sum       checksum = "774451f56e0f85e147cd4a952a67b7a3852fd2c4e0ccf1bf0e6d1d5a8512231c"
-	__wg_darwin_sha256sum        checksum = ""
-	__wg_windows_sha256sum       checksum = ""
+	__wg_darwin_sha256sum        checksum = "5c3700c41f6f3bd16e921df561be65c232d888dc38634593846fe8a937630d1a"
+	__wg_windows_sha256sum       checksum = __UNUSED
 	__wg_quick_linux_sha256sum   checksum = "cc50912aab62686e60c4844097163567ae7ee1ccf5bd29680a53379810813edc"
 	__wg_quick_freebsd_sha256sum checksum = "db33ebd08a6ae9bab620a8c2830822f517d7b8d284d7691c1b10d35b5eeefa1c"
-	__wg_quick_darwin_sha256sum  checksum = ""
-	__wg_quick_windows_sha256sum checksum = ""
+	__wg_quick_darwin_sha256sum  checksum = "a3a6a30f642078f01c23ec9abddb75ae434f73c0991f1b5cb9f14b68ec0ec9f5"
+	__wg_quick_windows_sha256sum checksum = __UNUSED
 )
 
 type (
@@ -56,7 +57,7 @@ var (
 
 // Returns the runtime specific checksum for a known dependency.
 func (d dependency) knownChecksum() (checksum, error) {
-	if cksm, ok := d.checksums[runtime.GOOS]; ok && len(cksm) > 0 {
+	if cksm, ok := d.checksums[runtime.GOOS]; ok && (len(cksm) > 0 || cksm == __UNUSED) {
 		return cksm, nil
 	}
 	return "", errors.New("invalid or non-existent checksum")
@@ -79,18 +80,21 @@ func (c checksum) decoded() []byte {
 
 // Compares the sha256sum of a file against a known checksum.
 func (d dependency) checksum() (bool, error) {
+	// Grab a known runtime specific known checksum
+	knownChecksum, err := d.knownChecksum()
+	if err != nil {
+		return false, err
+	}
+	if knownChecksum == __UNUSED {
+		return true, nil
+	}
+
 	// Ensure dependency exists
 	path, exists := d.exists()
 	if !exists {
 		fmt.Printf("\nmissing required dependency: %s", d.name)
 		return false, errors.New("dependency non-existent")
 	}
-	// Grab a known runtime specific known checksum
-	knownChecksum, err := d.knownChecksum()
-	if err != nil {
-		return false, err
-	}
-
 	// take the sha256sum of the dependency
 	f, err := os.Open(path)
 	if err != nil {
