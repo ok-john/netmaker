@@ -35,6 +35,8 @@ jobs:
       - name: run tests
         run: |
             sudo apt install wireguard-tools
+            wg version
+            sha256sum $(which wg)
             go test -p 1 ./... -v
         env:
           DATABASE: sqlite
